@@ -70,6 +70,8 @@ class UserProfile extends \yii\db\ActiveRecord implements IdentityInterface {
     public function beforeSave($insert) {
         if (!$this->isNewRecord) {
             $this->updated_on = date('Y-m-d H:i:s');
+        }else{
+            $this->created_by = $this->fb_user_id;
         }
         return parent::beforeSave($insert);
     }
