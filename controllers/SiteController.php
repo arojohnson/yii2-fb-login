@@ -23,19 +23,19 @@ class SiteController extends Controller {
      * @const - Facebook App ID
      * @var String 
      */
-    CONST appId = '';//'1494774084136099';
+    CONST appId = '1494774084136099';
 
     /**
      * @const - Facebook APP Secret
      * @var String 
      */
-    CONST appSecret = '';
+    CONST appSecret = '37786c679efb23bbcea75f3e58cf5dee';
 
     /**
      *
      * @const - Facebook Call Back URL while OAuth 
      */
-    CONST fbCallBackUrl = '';//'https://90129a69.ngrok.io/test/yii2-fb-login/web/site/fbcallback';
+    CONST fbCallBackUrl = 'https://90129a69.ngrok.io/test/yii2-fb-login/web/site/fbcallback';
 
     /**
      * @const - Facebook app Version
@@ -112,7 +112,7 @@ class SiteController extends Controller {
         }
         //Facebook instance
         $helper = $this->getFacebook()->getRedirectLoginHelper();
-        $permissions = ['email'];
+        $permissions = ['email','user_birthday','user_hometown','user_location'];
         $loginUrl = $helper->getLoginUrl(self::fbCallBackUrl, $permissions);
         return $this->render('index', ['loginUrl' => $loginUrl]);
     }
@@ -125,7 +125,9 @@ class SiteController extends Controller {
         $helper = $this->getFacebook()->getRedirectLoginHelper();
         $error_message = Yii::$app->request->get('error_message');
         try {
-            $accessToken = $helper->getAccessToken();
+            //Mandatory from FB in order to get the STRICT MODE URI's 
+            $callBackURL = \yii\helpers\Url::to('@web/site/fbcallback', true);
+            $accessToken = $helper->getAccessToken($callBackURL);
         } catch (Facebook\Exceptions\FacebookResponseException $e) {
             Yii::error('Graph returned an error: ' . $e->getMessage());
             return $this->render('error', ['message' => ($error_message !== '') ? $error_message : $this->errMsg]);
@@ -150,7 +152,7 @@ class SiteController extends Controller {
      */
     private function upsertUserProfile($accessToken) {
         try {
-            $response = $this->getFacebook()->get('/me?fields=id,name,picture,first_name,last_name', $accessToken);
+            $response = $this->getFacebook()->get('/me?fields=id,name,picture,first_name,last_name,birthday,cover,devices,email,gender,link, short_name,verified,hometown,location,locale', $accessToken);
         } catch (Facebook\Exceptions\FacebookResponseException $e) {
             Yii::error('Graph returned an error: ' . $e->getMessage());
             return $this->render('error', ['message' => $this->errMsg]);
